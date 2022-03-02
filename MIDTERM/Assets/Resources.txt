@@ -1,0 +1,10 @@
+TagSelectorAttribute.cs and TagSelectorPropertyDrawer.cs
+    Original by DYLAN ENGELMAN http://jupiterlighthousestudio.com/custom-inspectors-unity 
+    Altered by Brecht Lecluyse http://www.brechtos.com
+
+Simple Gems Ultimate Animated Customizable Pack
+    AurynSky on Unity Asset Store
+    https://assetstore.unity.com/packages/3d/props/simple-gems-ultimate-animated-customizable-pack-73764
+
+Animations and Character Model
+    https://www.mixamo.com/#/
