@@ -18,7 +18,6 @@ public class Collectable : MonoBehaviour
         {
             PlayerController player = FindObjectOfType<PlayerController>();
             player.IncreaseHealth();
-            FindObjectOfType<GameManager>().DisplayHealth(player.Health);
             Destroy(gameObject);
         }
     }
