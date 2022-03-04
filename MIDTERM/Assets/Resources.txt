@@ -8,3 +8,11 @@ Simple Gems Ultimate Animated Customizable Pack
 
 Animations and Character Model
     https://www.mixamo.com/#/
+
+Fence Model, Materials, and Textures
+    Jaroslav Grafskiy
+    https://assetstore.unity.com/packages/3d/props/exterior/mobile-wooden-fences-54772
+
+Third Person Camera Collider
+    Filmstorm
+    https://www.youtube.com/watch?v=LbDQHv9z-F0&ab_channel=Filmstorm

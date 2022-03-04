@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -10,20 +12,36 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject _fill;
     [SerializeField] private GameObject _winText;
     [SerializeField] private GameObject _loseText;
-    private int _playerMaxHealth;
-    private int _coinAmount;
+    [SerializeField] private float _waitTime;
+    public static GameManager Instance{get; private set;}
     private GameState _state;
+    private int _coinAmount;
+    private int _playerMaxHealth;
+    private bool _showingText; //Boolean so the text doesn't flicker on the screen too fast for the win/lose UI text
 
     public enum GameState { Win, Lose, Play }
-
     public GameState State { get { return _state; } set { _state = value; } }
-
+    
+    void Awake() 
+    {
+        //Singleton for the game manager
+        if(Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         _collectableText.text = "Jewels: 0";
         _state = GameState.Play;
+        _showingText = false;
     }
     
     void Update() 
@@ -31,14 +49,26 @@ public class GameManager : MonoBehaviour
         switch(_state)
         {
             case GameState.Win:
-                _winText.SetActive(true);
+                StartCoroutine(FlashText(_winText, _waitTime));
                 Debug.Log("You Win!");
                 break;
             case GameState.Lose:
-                _loseText.SetActive(true);
+                StartCoroutine(FlashText(_loseText, _waitTime));
                 Debug.Log("You Lose.");
                 break;
         }    
+    }
+    private IEnumerator FlashText(GameObject textObject, float waitTime)
+    {
+        if(!_showingText)
+        {
+            _showingText = true;
+            textObject.SetActive(true);
+            yield return new WaitForSeconds(waitTime);
+            textObject.SetActive(false);
+            yield return new WaitForSeconds(waitTime);
+            _showingText = false;
+        }
     }
 
     // Update is called once per frame

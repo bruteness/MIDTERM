@@ -17,6 +17,7 @@ public class Collectable : MonoBehaviour
         else if(other.tag == _playerTag && this.tag == _healthTag)
         {
             PlayerController player = FindObjectOfType<PlayerController>();
+            if(player.Health >= player.MaxHealth) return;
             player.IncreaseHealth();
             Destroy(gameObject);
         }
