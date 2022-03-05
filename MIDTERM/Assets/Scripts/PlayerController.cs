@@ -8,6 +8,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _gravity;
     [SerializeField] private int _maxHealth;
     [SerializeField] private int _health;
+    [SerializeField] private float _maxStamina;
+    [SerializeField] private float _staminaDecreaseSpeed;
+    [SerializeField] private float _staminaIncreaseSpeed;
     [SerializeField] private bool _hurtplayer;
 
     private CharacterController _controller;
@@ -15,12 +18,16 @@ public class PlayerController : MonoBehaviour
     private Animator _animator;
     private Vector3 _velocity;
     private bool _groundedPlayer;
+    private bool _canRun;
+    private float _stamina;
     private float _jumpHeight = 1.0f;
     private float _resetTimer = 3.0f;
     private float _idleTimer;
 
     public int Health { get { return _health; } }
     public int MaxHealth { get { return _maxHealth; } }
+    public float Stamina { get { return _stamina; } }
+    public float MaxStamina { get { return MaxStamina; } }
 
     void Start()
     {
@@ -28,14 +35,17 @@ public class PlayerController : MonoBehaviour
         _animator = GetComponent<Animator>();
         _gameManager = FindObjectOfType<GameManager>();
         _idleTimer = _resetTimer;
-        _health = _maxHealth;
+        _stamina = _maxStamina;
         _gameManager.DisplayHealth(Health);
     }
 
     void Update()
     {
+        //Always display the current stamina in the bar
+        _gameManager.DisplayStamina(_stamina);
+
         //Let the player move as long as the game is in the play state
-        if(_gameManager.State == GameManager.GameState.Play)
+        if (_gameManager.State == GameManager.GameState.Play)
         {
             //*For testing purposes. Would not keep in the final product.*
             //If the bool is pressed in the inspector, it will hurt the player, then reset itself to off so it can be
@@ -45,6 +55,9 @@ public class PlayerController : MonoBehaviour
                 DecreaseHealth();
                 _hurtplayer = false;
             }
+            
+            //Allow the player to run if they have enough stamina
+            _canRun = _stamina <= 1 ? false : true;
 
             //Handle the movement for the player
             Movement();
@@ -54,13 +67,14 @@ public class PlayerController : MonoBehaviour
                 Jump();
             }
         }
+
         //Play the lose animation and stop the player movement
-        else if(_gameManager.State == GameManager.GameState.Lose)
+        else if (_gameManager.State == GameManager.GameState.Lose)
         {
             _animator.SetTrigger("Die");
         }
         //Play the win animation and stop the player movement
-        else if(_gameManager.State == GameManager.GameState.Win)
+        else if (_gameManager.State == GameManager.GameState.Win)
         {
             _animator.SetTrigger("Win");
         }
@@ -85,28 +99,52 @@ public class PlayerController : MonoBehaviour
         _velocity.y += _gravity * Time.deltaTime; //Setting velocity in the y direction to the acceleration of gravity in relation to our fps (Time.deltaTime)
         _controller.Move(_velocity * Time.deltaTime); //Movement based on velocity
 
+        HandleMoveAniamtions(move);
+    }
+
+    private void HandleMoveAniamtions(Vector3 move)
+    {
         if (Input.GetKey(KeyCode.S) && move != Vector3.zero && !Input.GetKey(KeyCode.LeftShift))
         {
+            IncreaseStamina();
             StopLongIdle();
             WalkBackwards();
         }
         else if (move != Vector3.zero && !Input.GetKey(KeyCode.LeftShift))
         {
+            IncreaseStamina();
             StopLongIdle();
             Walk();
         }
         else if (Input.GetKey(KeyCode.S) && move != Vector3.zero && Input.GetKey(KeyCode.LeftShift))
         {
+            DecreaseStamina();
             StopLongIdle();
-            RunBackwards();
+            if(_canRun)
+            {
+                RunBackwards();
+            }
+            else
+            {
+                WalkBackwards();
+            }
         }
         else if (move != Vector3.zero && Input.GetKey(KeyCode.LeftShift))
         {
+            DecreaseStamina();
             StopLongIdle();
-            Run();
+            if(_canRun)
+            {
+                Run();
+            }
+            else
+            {
+                Walk();
+            }
         }
         else if (move == Vector3.zero)
         {
+            IncreaseStamina();
             Idle();
 
             //Play the animation for waiting around 
@@ -119,6 +157,18 @@ public class PlayerController : MonoBehaviour
                 StartLongIdle();
             }
         }
+    }
+
+    private void DecreaseStamina()
+    {
+        _stamina -= _staminaDecreaseSpeed * Time.deltaTime;
+        _stamina = _stamina <= 0 ? 0 : _stamina;
+    }
+
+    private void IncreaseStamina()
+    {
+        _stamina += _staminaIncreaseSpeed * Time.deltaTime;
+        _stamina = _stamina > _maxStamina ? _maxStamina : _stamina;
     }
 
     //Set the speed and animation to Walk
@@ -162,6 +212,7 @@ public class PlayerController : MonoBehaviour
         _idleTimer = _resetTimer;
         _animator.SetBool("isHoldingIdle", false);
     }
+
     private void Jump()
     {
         _velocity.y += Mathf.Sqrt(_jumpHeight * -3.0f * _gravity); //Change velocity to represent a jumping behavior
@@ -178,7 +229,7 @@ public class PlayerController : MonoBehaviour
     public void DecreaseHealth()
     {
         _health--;
-        if(_health <= 0)
+        if (_health <= 0)
         {
             _health = 0;
             _gameManager.State = GameManager.GameState.Lose;

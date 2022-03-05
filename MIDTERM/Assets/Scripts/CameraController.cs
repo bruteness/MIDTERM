@@ -23,5 +23,9 @@ public class CameraController : MonoBehaviour
             float horizontalRotation = Input.GetAxis("Mouse X") * _mouseMovement * Time.deltaTime; //horizontal rotation calculation
             parent.Rotate(0, horizontalRotation, 0); //rotate parent around the vertical axis-- horizontal movement
         }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+        }
     }
 }

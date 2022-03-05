@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class GameManager : MonoBehaviour
@@ -9,9 +10,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _collectableText;
     [SerializeField] private TextMeshProUGUI _healthText;
     [SerializeField] private Slider _healthSlider;
+    [SerializeField] private Slider _staminaSlider;
     [SerializeField] private GameObject _fill;
     [SerializeField] private GameObject _winText;
     [SerializeField] private GameObject _loseText;
+    [SerializeField] private GameObject _restartButton;
     [SerializeField] private float _waitTime;
     public static GameManager Instance{get; private set;}
     private GameState _state;
@@ -21,20 +24,6 @@ public class GameManager : MonoBehaviour
 
     public enum GameState { Win, Lose, Play }
     public GameState State { get { return _state; } set { _state = value; } }
-    
-    void Awake() 
-    {
-        //Singleton for the game manager
-        if(Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
 
     // Start is called before the first frame update
     void Start()
@@ -58,12 +47,14 @@ public class GameManager : MonoBehaviour
                 break;
         }    
     }
+
     private IEnumerator FlashText(GameObject textObject, float waitTime)
     {
         if(!_showingText)
         {
             _showingText = true;
             textObject.SetActive(true);
+            _restartButton.SetActive(true);
             yield return new WaitForSeconds(waitTime);
             textObject.SetActive(false);
             yield return new WaitForSeconds(waitTime);
@@ -90,5 +81,15 @@ public class GameManager : MonoBehaviour
             _fill.SetActive(false);
         else
             _fill.SetActive(true);
+    }
+
+    public void DisplayStamina(float stamina)
+    {
+        _staminaSlider.value = stamina / 100;
+    }
+
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
     }
 }
